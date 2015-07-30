@@ -1,4 +1,4 @@
-USE [DEVAAHOA_MSCRM]
+USE [yourservername]
 --create fulltext catalog FullTextCatalog as default
 GO
 /****** Object:  StoredProcedure [dbo].[BP_GetNearbyContacts]    Script Date: 7/23/2015 10:53:21 AM ******/
@@ -38,16 +38,16 @@ BEGIN
 DECLARE @lat1 float, 
 	@long1 float
 
-SELECT  @lat1= aahoa_latitude,
-        @long1 = aahoa_longitude 
+SELECT  @lat1= latitude,
+        @long1 = longitude 
 
 FROM 
-		Filteredaahoa_uspszipcodemapping z
+		Filterednew_uspszipcodemapping z
 WHERE 
-		z.aahoa_zipcode = @ZipCode
+		z.zipcode = @ZipCode
 
 SELECT
-		c.bpt_memberid
+		c.memberid
 		,c.fullname
 		,c.address1_line1
 		,c.address1_city
@@ -56,31 +56,31 @@ SELECT
 
 FROM
 (
-	SELECT  aahoa_primarycity,aahoa_longitude,aahoa_latitude,aahoa_zipcode,
+	SELECT  primarycity,longitude,latitude,zipcode,
 			3958.75 * ( Atan(Sqrt(1 - power(((Sin(@Lat1/57.2958) * 
-			Sin(aahoa_latitude/57.2958)) + (Cos(@Lat1/57.2958) * 
-			Cos(aahoa_latitude/57.2958) * Cos((aahoa_longitude/57.2958) - 
+			Sin(latitude/57.2958)) + (Cos(@Lat1/57.2958) * 
+			Cos(latitude/57.2958) * Cos((longitude/57.2958) - 
 			(@Long1/57.2958)))), 2)) / ((Sin(@Lat1/57.2958) * 
-			Sin(aahoa_latitude/57.2958)) + (Cos(@Lat1/57.2958) * 
-			Cos(aahoa_latitude/57.2958) * Cos((aahoa_longitude/57.2958) - 
+			Sin(latitude/57.2958)) + (Cos(@Lat1/57.2958) * 
+			Cos(latitude/57.2958) * Cos((longitude/57.2958) - 
 			(@Long1/57.2958)))))) MileRadius
-	FROM Filteredaahoa_uspszipcodemapping
-)  Filteredaahoa_uspszipcodemapping 
-		FULL OUTER JOIN FilteredContact as c on Filteredaahoa_uspszipcodemapping.aahoa_zipcode = c.address1_postalcode
+	FROM Filterednew_uspszipcodemapping
+)  Filterednew_uspszipcodemapping 
+		FULL OUTER JOIN FilteredContact as c on Filterednew_uspszipcodemapping.zipcode = c.address1_postalcode
     WHERE
- --       Filteredaahoa_uspszipcodemapping.aahoa_latitude between @Min_Lat and @Max_Lat
+ --       Filterednew_uspszipcodemapping.latitude between @Min_Lat and @Max_Lat
  --   AND
- --       Filteredaahoa_uspszipcodemapping.aahoa_longitude between @Min_Lng and @Max_Lng 
+ --       Filterednew_uspszipcodemapping.longitude between @Min_Lng and @Max_Lng 
 	--AND 
 		c.address1_postalcode is not null
 	AND
-		Filteredaahoa_uspszipcodemapping.aahoa_primarycity = c.address1_city
+		Filterednew_uspszipcodemapping.primarycity = c.address1_city
 	AND
-		Filteredaahoa_uspszipcodemapping.MileRadius <= @GivenMileRadius
+		Filterednew_uspszipcodemapping.MileRadius <= @GivenMileRadius
 	AND 
-		aahoa_zipcode <> @ZipCode
+		zipcode <> @ZipCode
 ORDER BY MileRadius
-option (querytraceon 8780)
+option (querytraceon 8780) -- Flag to optimize performance
 
 END
 
@@ -105,17 +105,17 @@ END
 --	Declare @codezip nvarchar(30)
 
 --	SELECT
---        @primarycity = z.aahoa_primarycity,
---        @state = z.aahoa_state,
---        @zipcode = z.aahoa_zipcode,
---        @latitude = z.aahoa_latitude,
---        @longitude = z.aahoa_longitude
+--        @primarycity = z.primarycity,
+--        @state = z.state,
+--        @zipcode = z.zipcode,
+--        @latitude = z.latitude,
+--        @longitude = z.longitude
         
 --    FROM
---        Filteredaahoa_uspszipcodemapping z
+--        Filterednew_uspszipcodemapping z
     
 --	WHERE
---        z.aahoa_zipcode = @ZipCodeSelect
+--        z.zipcode = @ZipCodeSelect
 		
 -- --   SET  @Min_Lat= @latitude - @flDegreeRadius
 -- --   SET @Min_Lng = @longitude - @flDegreeRadius
@@ -128,19 +128,19 @@ END
 
 
 --    SELECT
---		c.bpt_memberid
+--		c.memberid
 --		,c.fullname
 --		,c.address1_line1
 --		,c.address1_city
 --		,c.address1_stateorprovince
 --		,c.address1_postalcode
 --    FROM
---        Filteredaahoa_uspszipcodemapping z
---		FULL OUTER JOIN FilteredContact as c on z.aahoa_zipcode = c.address1_postalcode
+--        Filterednew_uspszipcodemapping z
+--		FULL OUTER JOIN FilteredContact as c on z.zipcode = c.address1_postalcode
 --    WHERE
---        z.aahoa_latitude between @Min_Lat and @Max_Lat
+--        z.latitude between @Min_Lat and @Max_Lat
 --    AND
---        z.aahoa_longitude between @Min_Lng and @Max_Lng 
+--        z.longitude between @Min_Lng and @Max_Lng 
 --	AND 
 --		c.address1_postalcode is not null
 --	AND
